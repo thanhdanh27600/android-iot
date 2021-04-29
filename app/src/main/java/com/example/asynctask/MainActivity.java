@@ -8,6 +8,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.squareup.okhttp.Callback;
@@ -23,19 +24,30 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
     OkHttpClient client;
-    String res;
-    Button btnStart;
+    EditText editA;
     myTask myAsyncTask;
-    TextView tv;
+    String resp;
+    TextView[] res = new TextView[6];
+    Button btn_add;
+    int A;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        btnStart = (Button) findViewById(R.id.btnStart);
-        tv = findViewById(R.id.textView);
-        btnStart.setOnClickListener(new View.OnClickListener() {
+        editA = findViewById(R.id.input_A);
+
+        btn_add = findViewById(R.id.button_add);
+        res[0] = findViewById(R.id.PM1);
+        res[1] = findViewById(R.id.PM2);
+        res[2] = findViewById(R.id.PM10);
+        res[3] = findViewById(R.id.CO2);
+        res[4] = findViewById(R.id.CO);
+        res[5] = findViewById(R.id.HCHO);
+
+        btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                A = Integer.parseInt(editA.getText() + "");
                 myAsyncTask = new myTask();
                 myAsyncTask.execute();
             }
@@ -68,11 +80,16 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             try {
-                JSONArray array = new JSONArray(res);
-                JSONObject object = array.getJSONObject(2);
-                tv.append(object.getString("ID"));
-                tv.append(object.getString("PM1_0"));
-                tv.append(object.getString("CO"));
+                JSONArray array = new JSONArray(resp);
+                JSONObject object = array.getJSONObject((A-1));
+
+                res[0].setText(object.getString("PM1_0"));
+                res[1].setText(object.getString("PM2_5"));
+                res[2].setText(object.getString("PM10"));
+                res[3].setText(object.getString("CO2"));
+                res[4].setText(object.getString("CO"));
+                res[5].setText(object.getString("HCHO"));
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -87,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         Response response;
 
         response = okHttpClient.newCall(request).execute();
-        res = response.body().string();
+        resp = response.body().string();
 
     }
 }
